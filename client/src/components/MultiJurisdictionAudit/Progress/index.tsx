@@ -69,6 +69,8 @@ const Progress: React.FC<IProps> = ({
           {jurisdiction.name}
         </Button>
       ),
+      // @ts-ignore
+      Footer: <strong>Total</strong>,
     },
     {
       Header: 'Status',
@@ -157,15 +159,39 @@ const Progress: React.FC<IProps> = ({
           }[currentRoundStatus.status]
         }
       ),
+      // @ts-ignore
+      // eslint-disable-next-line react/display-name, react/prop-types
+      Footer: ({ rows }) => (
+        <strong>
+          {
+            // eslint-disable-next-line react/prop-types, array-callback-return
+            rows.map((row: any) => {
+              console.log(row)
+            }).length
+          }
+        </strong>
+      ),
     },
     {
       Header: `${ballotsOrBatches} in Manifest`,
       accessor: ({ ballotManifest: { numBallots, numBatches } }) =>
-        formatNumber(
           auditSettings.auditType === 'BATCH_COMPARISON'
             ? numBatches
             : numBallots
-        ),
+      // TODO figure out the best way to put the sum of the column in the footer
+      Cell: ({value})
+      // @ts-ignore
+      // eslint-disable-next-line react/display-name, react/prop-types
+      Footer: ({ rows }) => (
+        <strong>
+          {
+            // eslint-disable-next-line react/prop-types, array-callback-return
+            rows.map((row: any) => {
+              console.log(row)
+            }).length
+          }
+        </strong>
+      ),
     },
   ]
   if (round) {
@@ -226,7 +252,7 @@ const Progress: React.FC<IProps> = ({
           onChange={value => setFilter(value)}
         />
       </TableControls>
-      <Table data={filteredJurisdictions} columns={columns} />
+      <Table data={filteredJurisdictions} columns={columns} height={500} />
       {jurisdictionDetail && (
         <JurisdictionDetail
           jurisdiction={jurisdictionDetail}

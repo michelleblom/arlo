@@ -1,20 +1,35 @@
 import React from 'react'
-import { useTable, useSortBy, Column, Row } from 'react-table'
+import { useTable, useSortBy, Column, Row, useBlockLayout } from 'react-table'
 import styled from 'styled-components'
 import { Icon } from '@blueprintjs/core'
 
 const StyledTable = styled.table`
   width: 100%;
+  // height: 100%;
   table-layout: fixed;
 
-  thead {
+  thead,
+  tfoot {
+    display: block;
     background-color: #e1e8ed; /* BlueprintJS light-gray3 */
+    width: 100%;
     border-spacing: 0;
     color: #394b59; /* BlueprintJS dark-gray5 */
   }
 
+  tbody {
+    display: block;
+    width: 100%;
+  }
+
+  tr {
+    display: flex;
+    width: 100%;
+  }
+
   th,
   td {
+    flex-basis: 100%;
     margin: 0;
     padding: 0.5rem 0.4rem;
     text-align: left;
@@ -51,9 +66,14 @@ export const FilterInput = <T extends object>({
 interface ITableProps<T extends object> {
   data: T[]
   columns: Column<T>[]
+  height?: number
 }
 
-export const Table = <T extends object>({ data, columns }: ITableProps<T>) => {
+export const Table = <T extends object>({
+  data,
+  columns,
+  height,
+}: ITableProps<T>) => {
   const {
     getTableProps,
     getTableBodyProps,
@@ -74,7 +94,8 @@ export const Table = <T extends object>({ data, columns }: ITableProps<T>) => {
 
   return (
     <StyledTable {...getTableProps()}>
-      <thead>
+      {/* Padding to account for approx width of scrollbar */}
+      <thead style={height ? { paddingRight: '1.1rem' } : undefined}>
         <tr>
           {headers.map(column => (
             <th
@@ -110,7 +131,10 @@ export const Table = <T extends object>({ data, columns }: ITableProps<T>) => {
           ))}
         </tr>
       </thead>
-      <tbody {...getTableBodyProps()}>
+      <tbody
+        {...getTableBodyProps()}
+        style={height ? { height, overflowY: 'scroll' } : undefined}
+      >
         {rows.map(row => {
           prepareRow(row)
           return (
@@ -122,6 +146,15 @@ export const Table = <T extends object>({ data, columns }: ITableProps<T>) => {
           )
         })}
       </tbody>
+      {columns.some(column => 'Footer' in column) && (
+        <tfoot>
+          <tr>
+            {headers.map(column => (
+              <td {...column.getFooterProps()}>{column.render('Footer')}</td>
+            ))}
+          </tr>
+        </tfoot>
+      )}
     </StyledTable>
   )
 }
