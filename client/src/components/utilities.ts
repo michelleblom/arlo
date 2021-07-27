@@ -11,6 +11,14 @@ export const tryJson = (responseText: string) => {
   }
 }
 
+export const parseApiError = async (response: Response) => {
+  const responseText = await response.text()
+  const { errors } = tryJson(responseText)
+  const error =
+    errors && errors.length ? errors[0] : { message: response.statusText }
+  return { ...error, responseText, response }
+}
+
 export const api = async <T>(
   endpoint: string,
   options?: RequestInit
@@ -29,13 +37,9 @@ export const api = async <T>(
         return null
       }
 
-      const responseText = await response.text()
-      const { errors } = tryJson(responseText)
-      const error =
-        errors && errors.length ? errors[0] : { message: response.statusText }
-      const errorData = { ...error, responseText, response }
-      console.error(responseText) // eslint-disable-line no-console
-      throw errorData
+      const error = await parseApiError(response)
+      console.error(error.responseText) // eslint-disable-line no-console
+      throw error
     }
     return response.json() as Promise<T>
   } catch (err) {
